@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>拼图游戏</title>
+    <style>
+        *{margin:0;padding:0;font-family:微软雅黑;box-sizing:border-box}
+        body{background:#fce4ec;text-align:center;padding:20px}
+        .title{color:#c2185b;font-size:28px;margin-bottom:15px}
+        .instructions{color:#666;font-size:14px;margin-bottom:15px;padding:10px;background:#fff;border-radius:8px;display:inline-block;max-width:320px;text-align:left}
+        .timer{color:#c2185b;font-size:20px;font-weight:bold;margin-bottom:15px}
+        .puzzle{display:grid;grid-template-columns:repeat(3,120px);gap:8px;justify-content:center;margin:0 auto}
+        .piece{width:120px;height:120px;background:#ffccbc;border:3px solid #fff;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:36px;cursor:pointer;transition:all 0.2s}
+        .piece:hover{transform:scale(1.05)}
+        .empty{background:white;cursor:default}
+        .empty:hover{transform:none}
+        .win{color:#4caf50;font-size:24px;font-weight:bold;margin-top:15px}
+    </style>
+</head>
+<body>
+    <div class="title">🧩 可爱拼图</div>
+    <div class="instructions">
+        <strong>游戏说明：</strong><br>
+        1. 点击数字方块移动到空白位置<br>
+        2. 将数字按1-8顺序排列即可获胜<br>
+        3. 限时2分钟，加油！
+    </div>
+    <div class="timer" id="timer">⏱️ 剩余时间：02:00</div>
+    <div class="puzzle" id="puzzle"></div>
+    <div class="win" id="win" style="display:none">🎉 恭喜完成！</div>
+
+    <script>
+        let arr = [1,2,3,4,5,6,7,8,''];
+        let timeLeft = 120; // 2分钟 = 120秒
+        let timerInterval;
+
+        function formatTime(seconds){
+            let mins = Math.floor(seconds / 60);
+            let secs = seconds % 60;
+            return `${mins.toString().padStart(2,'0')}:${secs.toString().padStart(2,'0')}`;
+        }
+
+        function updateTimer(){
+            timeLeft--;
+            document.getElementById('timer').innerHTML = `⏱️ 剩余时间：${formatTime(timeLeft)}`;
+            
+            if(timeLeft <= 0){
+                clearInterval(timerInterval);
+                alert('⏰ 时间到！游戏结束');
+                resetGame();
+            }
+        }
+
+        function checkWin(){
+            const target = [1,2,3,4,5,6,7,8,''];
+            if(JSON.stringify(arr) === JSON.stringify(target)){
+                clearInterval(timerInterval);
+                document.getElementById('win').style.display = 'block';
+                return true;
+            }
+            return false;
+        }
+
+        function render(){
+            let p = document.getElementById('puzzle');
+            p.innerHTML='';
+            arr.forEach(n=>{
+                let d=document.createElement('div');
+                d.className='piece'+(n==''?' empty':'');
+                d.innerText=n;
+                d.onclick=()=>move(n);
+                p.appendChild(d);
+            })
+        }
+
+        function move(n){
+            if(timeLeft <= 0) return;
+            let i=arr.indexOf(n);
+            let e=arr.indexOf('');
+            if([i-1,i+1,i-3,i+3].includes(e)){
+                [arr[i],arr[e]]=[arr[e],arr[i]];
+                render();
+                checkWin();
+            }
+        }
+
+        function resetGame(){
+            arr = [1,2,3,4,5,6,7,8,''];
+            arr.sort(()=>Math.random()-0.5);
+            timeLeft = 120;
+            document.getElementById('timer').innerHTML = `⏱️ 剩余时间：${formatTime(timeLeft)}`;
+            document.getElementById('win').style.display = 'none';
+            timerInterval = setInterval(updateTimer, 1000);
+            render();
+        }
+
+        resetGame();
+    </script>
+</body>
+</html>
